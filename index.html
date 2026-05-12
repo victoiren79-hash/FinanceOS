@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanceOS | Group Finance Manager</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-[#F0F4F8] text-slate-900 flex h-screen overflow-hidden">
+
+    <!-- ── AUTH SCREEN ── -->
+    <div id="auth-screen" class="fixed inset-0 auth-bg flex items-center justify-center z-[200] p-4">
+        <div class="auth-card w-full max-w-md">
+            <!-- Logo -->
+            <div class="flex flex-col items-center mb-8">
+                <div class="logo-mark mb-4">
+                    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="48" height="48" rx="14" fill="#10b981"/>
+                        <path d="M12 34L20 18L24 26L28 20L36 34" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="36" cy="14" r="4" fill="white" fill-opacity="0.9"/>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">FinanceOS</h1>
+                <p class="text-sm text-slate-400 mt-1">Group Finance Manager</p>
+            </div>
+            <div class="space-y-3">
+                <input id="email" type="email" placeholder="Email address" class="auth-input">
+                <input id="password" type="password" placeholder="Password" class="auth-input">
+                <button id="auth-btn" class="auth-submit">Login</button>
+                <button id="toggle-btn" class="auth-toggle">New here? Sign Up</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── SIDEBAR OVERLAY ── -->
+    <div id="sidebar-overlay"></div>
+
+    <!-- ── SIDEBAR ── -->
+    <aside id="sidebar" class="w-64 sidebar-bg text-white flex flex-col hidden shrink-0">
+        <!-- Brand -->
+        <div class="px-6 py-6 flex items-center justify-between border-b border-white/10">
+            <div class="flex items-center gap-3">
+                <div class="sidebar-logo">
+                    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="48" height="48" rx="12" fill="#10b981"/>
+                        <path d="M12 34L20 18L24 26L28 20L36 34" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="36" cy="14" r="4" fill="white" fill-opacity="0.9"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="font-extrabold text-base tracking-tight">FinanceOS</div>
+                    <div class="text-[10px] text-white/40 uppercase tracking-widest">Group Finance</div>
+                </div>
+            </div>
+            <button id="sidebar-close" class="sidebar-close-btn">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <!-- Nav -->
+        <nav class="flex-1 px-3 py-4 space-y-1">
+            <button id="nav-dashboard" class="nav-item active-nav w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 transition">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                Dashboard
+            </button>
+            <button id="nav-members" class="nav-item w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 text-white/50 hover:text-white transition">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                Members
+            </button>
+            <button id="nav-loans" class="nav-item w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 text-white/50 hover:text-white transition">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Loan Ledger
+            </button>
+            <button id="nav-reports" class="nav-item w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 text-white/50 hover:text-white transition">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+                Reports
+            </button>
+        </nav>
+
+        <!-- User footer -->
+        <div class="px-5 py-5 border-t border-white/10">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-xs">M</div>
+                <span id="user-name" class="text-xs text-white/50 truncate flex-1">Manager</span>
+            </div>
+            <button id="logout-btn" class="flex items-center gap-2 text-[11px] font-bold text-red-400 uppercase tracking-widest hover:text-red-300 transition">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- ── MAIN APP ── -->
+    <main id="main-app" class="flex-1 flex flex-col hidden overflow-hidden">
+
+        <!-- Header -->
+        <header class="h-[68px] bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 shadow-sm">
+            <div class="flex items-center gap-3">
+                <button id="hamburger-btn" class="hamburger-btn">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+                <h1 id="header-title" class="font-bold text-slate-800 text-base tracking-tight">Dashboard</h1>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="openModal('trans-modal','Deposit')"        class="header-btn btn-green">+ Deposit</button>
+                <button onclick="openModal('trans-modal','Loan Issue')"     class="header-btn btn-dark">Issue Loan</button>
+                <button onclick="openModal('trans-modal','Loan Repayment')" class="header-btn btn-amber">Repayment</button>
+            </div>
+        </header>
+
+        <!-- Page content -->
+        <div class="page-scroll p-6 space-y-6 overflow-y-auto w-full">
+
+            <!-- DASHBOARD -->
+            <div id="page-dashboard" class="page-view space-y-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="stat-card">
+                        <p class="stat-label">Pool Balance</p>
+                        <h3 id="stat-pool" class="stat-value text-slate-800">RWF 0</h3>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-label">On Loan</p>
+                        <h3 id="stat-loan" class="stat-value text-blue-600">RWF 0</h3>
+                    </div>
+                    <div class="stat-card accent-card">
+                        <p class="stat-label text-emerald-600">Est. Interest (10%)</p>
+                        <h3 id="stat-interest" class="stat-value text-emerald-600">RWF 0</h3>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-label">Total Members</p>
+                        <h3 id="stat-count" class="stat-value text-slate-800">0</h3>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Recent Activity</span>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead><tr><th>Member</th><th>Type</th><th class="text-right">Amount</th><th class="text-right">Date</th></tr></thead>
+                            <tbody id="ledger-rows"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MEMBERS -->
+            <div id="page-members" class="page-view hidden space-y-5">
+                <div class="flex justify-between items-center">
+                    <h2 class="page-title">Member Directory</h2>
+                    <button onclick="openModal('member-modal')" class="header-btn btn-dark">+ New Member</button>
+                </div>
+                <div class="card">
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead><tr><th>Full Name</th><th class="text-right">Balance</th><th class="text-right">Actions</th></tr></thead>
+                            <tbody id="member-directory-rows"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LOANS -->
+            <div id="page-loans" class="page-view hidden space-y-5">
+                <h2 class="page-title">Loan Ledger</h2>
+                <div class="card">
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead><tr><th>Borrower</th><th>Date Issued</th><th class="text-right">Principal</th><th class="text-right">Status</th></tr></thead>
+                            <tbody id="loan-ledger-rows"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORTS -->
+            <div id="page-reports" class="page-view hidden space-y-5">
+                <h2 class="page-title">Financial Reports</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="report-card">
+                        <div class="report-icon bg-emerald-100">
+                            <svg class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <p class="report-label">Gross Contributions</p>
+                        <h4 id="report-savings" class="report-value text-emerald-600">RWF 0</h4>
+                    </div>
+                    <div class="report-card">
+                        <div class="report-icon bg-blue-100">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        </div>
+                        <p class="report-label">Outstanding Debt</p>
+                        <h4 id="report-loans" class="report-value text-blue-600">RWF 0</h4>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ── BOTTOM NAV (mobile) ── -->
+    <nav id="bottom-nav">
+        <button data-page="dashboard" class="bottom-nav-btn active">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            Home
+        </button>
+        <button data-page="members" class="bottom-nav-btn">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            Members
+        </button>
+        <button data-page="loans" class="bottom-nav-btn">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Loans
+        </button>
+        <button data-page="reports" class="bottom-nav-btn">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+            Reports
+        </button>
+    </nav>
+
+    <!-- ── MEMBER MODAL ── -->
+    <div id="member-modal" class="modal-wrap hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title">Register Member</h3>
+                <button onclick="closeModal('member-modal')" class="modal-close">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <input id="m-name" type="text" placeholder="Full Name" class="modal-input">
+            <div class="modal-actions">
+                <button onclick="closeModal('member-modal')" class="btn-cancel">Cancel</button>
+                <button onclick="saveMember()" class="btn-confirm btn-dark-solid">Save Member</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── TRANSACTION MODAL ── -->
+    <div id="trans-modal" class="modal-wrap hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="t-modal-title" class="modal-title">Transaction</h3>
+                <button onclick="closeModal('trans-modal')" class="modal-close">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <label class="modal-label">Member</label>
+            <select id="t-member-select" class="modal-input mb-4"></select>
+            <label class="modal-label">Amount (RWF)</label>
+            <input id="t-amount" type="number" inputmode="decimal" placeholder="e.g. 50,000" class="modal-input">
+            <div class="modal-actions">
+                <button onclick="closeModal('trans-modal')" class="btn-cancel">Cancel</button>
+                <button id="t-save-btn" class="btn-confirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
