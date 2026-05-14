@@ -4,24 +4,88 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinanceOS | Group Finance Manager</title>
-    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        .auth-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0f2a1e 100%); }
+        .auth-card { background: white; border-radius: 24px; padding: 40px; box-shadow: 0 32px 64px rgba(0,0,0,0.25); }
+        .logo-mark svg { width: 56px; height: 56px; }
+        .auth-input { width: 100%; padding: 14px 16px; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 14px; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.15s, box-shadow 0.15s; display: block; }
+        .auth-input:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.12); }
+        .auth-submit { width: 100%; background: #10b981; color: white; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 15px; border: none; cursor: pointer; transition: background 0.15s, transform 0.1s; font-family: 'Inter', sans-serif; margin-top: 4px; }
+        .auth-submit:hover { background: #059669; } .auth-submit:active { transform: scale(0.98); }
+        .auth-toggle { display: block; width: 100%; background: none; border: none; color: #94a3b8; font-size: 12px; font-weight: 600; cursor: pointer; padding: 8px; font-family: 'Inter', sans-serif; transition: color 0.15s; } .auth-toggle:hover { color: #10b981; }
+        .sidebar-bg { background: linear-gradient(180deg, #0f172a 0%, #111827 100%); }
+        .sidebar-logo svg { width: 36px; height: 36px; }
+        .sidebar-close-btn { display: none; background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer; padding: 4px; border-radius: 6px; transition: color 0.15s; } .sidebar-close-btn:hover { color: white; }
+        .nav-item { transition: all 0.15s; }
+        .active-nav { background: rgba(16,185,129,0.15) !important; color: #10b981 !important; font-weight: 700 !important; } .active-nav svg { color: #10b981; }
+        .hamburger-btn { display: none; background: none; border: none; cursor: pointer; padding: 6px; border-radius: 8px; color: #475569; margin-right: 2px; transition: background 0.15s; } .hamburger-btn:hover { background: #f1f5f9; }
+        .header-btn { padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; border: none; cursor: pointer; transition: all 0.15s; font-family: 'Inter', sans-serif; white-space: nowrap; }
+        .btn-green { background: #10b981; color: white; } .btn-green:hover { background: #059669; }
+        .btn-dark { background: #0f172a; color: white; } .btn-dark:hover { background: #1e293b; }
+        .btn-amber { background: #f59e0b; color: white; } .btn-amber:hover { background: #d97706; }
+        .card { background: white; border-radius: 16px; border: 1px solid #e8edf2; box-shadow: 0 1px 4px rgba(0,0,0,0.04); overflow: hidden; }
+        .card-header { padding: 16px 20px; border-bottom: 1px solid #f1f5f9; background: #fafbfc; display: flex; align-items: center; justify-content: space-between; }
+        .card-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; }
+        .stat-card { background: white; border-radius: 16px; border: 1px solid #e8edf2; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); } .accent-card { border-left: 4px solid #10b981; }
+        .stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #94a3b8; margin-bottom: 6px; }
+        .stat-value { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; }
+        .report-card { background: white; border-radius: 20px; border: 1px solid #e8edf2; padding: 32px 28px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+        .report-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }
+        .report-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #94a3b8; }
+        .report-value { font-size: 2rem; font-weight: 900; letter-spacing: -0.03em; }
+        .page-title { font-size: 1.3rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; }
+        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .data-table { width: 100%; text-align: left; font-size: 13px; min-width: 360px; border-collapse: collapse; }
+        .data-table thead tr { border-bottom: 1px solid #f1f5f9; background: #fafbfc; }
+        .data-table th { padding: 12px 20px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; color: #94a3b8; white-space: nowrap; }
+        .data-table td { padding: 14px 20px; white-space: nowrap; color: #334155; border-bottom: 1px solid #f8fafc; }
+        .data-table tbody tr:last-child td { border-bottom: none; } .data-table tbody tr:hover td { background: #f8fafc; }
+        .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+        .badge-green { background: #ecfdf5; color: #059669; } .badge-blue { background: #eff6ff; color: #2563eb; } .badge-amber { background: #fffbeb; color: #d97706; } .badge-red { background: #fef2f2; color: #dc2626; }
+        .modal-wrap { position: fixed; inset: 0; background: rgba(15,23,42,0.65); backdrop-filter: blur(6px); z-index: 300; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .modal-card { background: white; border-radius: 24px; padding: 28px; width: 100%; max-width: 400px; box-shadow: 0 24px 48px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+        .modal-title { font-size: 18px; font-weight: 800; color: #0f172a; }
+        .modal-close { background: #f1f5f9; border: none; border-radius: 8px; padding: 6px; cursor: pointer; color: #64748b; transition: background 0.15s; } .modal-close:hover { background: #e2e8f0; color: #0f172a; }
+        .modal-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #64748b; margin-bottom: 6px; }
+        .modal-input { width: 100%; padding: 13px 15px; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 14px; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.15s, box-shadow 0.15s; background: #f8fafc; margin-bottom: 16px; display: block; }
+        .modal-input:focus { border-color: #10b981; background: white; box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
+        .modal-actions { display: flex; gap: 10px; margin-top: 8px; }
+        .btn-cancel { flex: 1; padding: 13px; border: 1.5px solid #e2e8f0; border-radius: 12px; background: none; font-weight: 600; font-size: 13px; color: #64748b; cursor: pointer; font-family: 'Inter', sans-serif; transition: background 0.15s; } .btn-cancel:hover { background: #f8fafc; }
+        .btn-confirm { flex: 1; padding: 13px; border: none; border-radius: 12px; font-weight: 700; font-size: 13px; color: white; cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity 0.15s, transform 0.1s; } .btn-confirm:hover { opacity: 0.9; } .btn-confirm:active { transform: scale(0.98); }
+        .btn-dark-solid { background: #0f172a; }
+        .btn-danger-solid { background: #dc2626; }
+        .hidden { display: none !important; }
+        .page-view { animation: fadeIn 0.2s ease; } @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        #bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 64px; background: #0f172a; border-top: 1px solid rgba(255,255,255,0.07); z-index: 100; align-items: stretch; }
+        .bottom-nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #475569; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; background: none; border: none; cursor: pointer; transition: color 0.15s; font-family: 'Inter', sans-serif; } .bottom-nav-btn svg { width: 20px; height: 20px; } .bottom-nav-btn.active { color: #10b981; }
+        #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.55); z-index: 199; backdrop-filter: blur(2px); } #sidebar-overlay.open { display: block; }
+        @media (max-width: 768px) {
+            body { flex-direction: column; height: 100dvh; overflow: hidden; }
+            #sidebar { position: fixed !important; top: 0; left: 0; bottom: 0; z-index: 200; transform: translateX(-100%); transition: transform 0.25s ease; display: flex !important; }
+            #sidebar.open { transform: translateX(0); box-shadow: 12px 0 40px rgba(0,0,0,0.35); } .sidebar-close-btn { display: flex; align-items: center; }
+            #main-app { width: 100% !important; overflow: hidden; padding-bottom: 64px; }
+            header { padding: 0 14px !important; } .hamburger-btn { display: flex; } .header-btn { font-size: 11px; padding: 7px 10px; }
+            .page-scroll { padding: 14px !important; } .stat-value { font-size: 1.05rem; } .stat-card { padding: 14px; }
+            .data-table th { padding: 10px 14px; } .data-table td { padding: 12px 14px; font-size: 12px; }
+            .report-card { padding: 22px 20px; } .report-value { font-size: 1.6rem; } #bottom-nav { display: flex; }
+            .modal-card { padding: 22px 18px; border-radius: 20px; }
+        }
+    </style>
 </head>
 <body class="bg-[#F0F4F8] text-slate-900 flex h-screen overflow-hidden">
 
     <!-- ── AUTH SCREEN ── -->
     <div id="auth-screen" class="fixed inset-0 auth-bg flex items-center justify-center z-[200] p-4">
         <div class="auth-card w-full max-w-md">
-            <!-- Logo -->
             <div class="flex flex-col items-center mb-8">
                 <div class="logo-mark mb-4">
-                    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="48" height="48" rx="14" fill="#10b981"/>
-                        <path d="M12 34L20 18L24 26L28 20L36 34" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                        <circle cx="36" cy="14" r="4" fill="white" fill-opacity="0.9"/>
-                    </svg>
+                    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="48" height="48" rx="14" fill="#10b981"/><path d="M12 34L20 18L24 26L28 20L36 34" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="36" cy="14" r="4" fill="white" fill-opacity="0.9"/></svg>
                 </div>
                 <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">FinanceOS</h1>
                 <p class="text-sm text-slate-400 mt-1">Group Finance Manager</p>
@@ -35,229 +99,401 @@
         </div>
     </div>
 
-    <!-- ── SIDEBAR OVERLAY ── -->
     <div id="sidebar-overlay"></div>
 
     <!-- ── SIDEBAR ── -->
     <aside id="sidebar" class="w-64 sidebar-bg text-white flex flex-col hidden shrink-0">
-        <!-- Brand -->
         <div class="px-6 py-6 flex items-center justify-between border-b border-white/10">
             <div class="flex items-center gap-3">
-                <div class="sidebar-logo">
-                    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="48" height="48" rx="12" fill="#10b981"/>
-                        <path d="M12 34L20 18L24 26L28 20L36 34" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                        <circle cx="36" cy="14" r="4" fill="white" fill-opacity="0.9"/>
-                    </svg>
-                </div>
-                <div>
-                    <div class="font-extrabold text-base tracking-tight">FinanceOS</div>
-                    <div class="text-[10px] text-white/40 uppercase tracking-widest">Group Finance</div>
-                </div>
+                <div class="sidebar-logo"><svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="48" height="48" rx="12" fill="#10b981"/><path d="M12 34L20 18L24 26L28 20L36 34" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="36" cy="14" r="4" fill="white" fill-opacity="0.9"/></svg></div>
+                <div><div class="font-extrabold text-base tracking-tight">FinanceOS</div><div class="text-[10px] text-white/40 uppercase tracking-widest">Group Finance</div></div>
             </div>
-            <button id="sidebar-close" class="sidebar-close-btn">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
+            <button id="sidebar-close" class="sidebar-close-btn"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
         </div>
-
-        <!-- Nav -->
         <nav class="flex-1 px-3 py-4 space-y-1">
-            <button id="nav-dashboard" class="nav-item active-nav w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 transition">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                Dashboard
-            </button>
-            <button id="nav-members" class="nav-item w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 text-white/50 hover:text-white transition">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                Members
-            </button>
-            <button id="nav-loans" class="nav-item w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 text-white/50 hover:text-white transition">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                Loan Ledger
-            </button>
-            <button id="nav-reports" class="nav-item w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 text-white/50 hover:text-white transition">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
-                Reports
-            </button>
+            <button id="nav-dashboard" class="nav-item active-nav w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 transition"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>Dashboard</button>
+            <button id="nav-members" class="nav-item w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 text-white/50 hover:text-white transition"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4a4 4 0 11-8 0 4 4 0 018 0z"/></svg>Members</button>
+            <button id="nav-shares" class="nav-item w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 text-white/50 hover:text-white transition"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/></svg>Shares</button>
+            <button id="nav-loans" class="nav-item w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 text-white/50 hover:text-white transition"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>Loan Ledger</button>
+            <button id="nav-reports" class="nav-item w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 text-white/50 hover:text-white transition"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>Reports</button>
         </nav>
-
-        <!-- User footer -->
         <div class="px-5 py-5 border-t border-white/10">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-xs">M</div>
-                <span id="user-name" class="text-xs text-white/50 truncate flex-1">Manager</span>
-            </div>
-            <button id="logout-btn" class="flex items-center gap-2 text-[11px] font-bold text-red-400 uppercase tracking-widest hover:text-red-300 transition">
-                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                Logout
-            </button>
+            <div class="flex items-center gap-3 mb-4"><div class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-xs">M</div><span id="user-name" class="text-xs text-white/50 truncate flex-1">Manager</span></div>
+            <button id="logout-btn" class="flex items-center gap-2 text-[11px] font-bold text-red-400 uppercase tracking-widest hover:text-red-300 transition"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>Logout</button>
         </div>
     </aside>
 
     <!-- ── MAIN APP ── -->
     <main id="main-app" class="flex-1 flex flex-col hidden overflow-hidden">
-
-        <!-- Header -->
         <header class="h-[68px] bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 shadow-sm">
             <div class="flex items-center gap-3">
-                <button id="hamburger-btn" class="hamburger-btn">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                </button>
+                <button id="hamburger-btn" class="hamburger-btn"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
                 <h1 id="header-title" class="font-bold text-slate-800 text-base tracking-tight">Dashboard</h1>
             </div>
             <div class="flex gap-2">
-                <button onclick="openModal('trans-modal','Deposit')"        class="header-btn btn-green">+ Deposit</button>
-                <button onclick="openModal('trans-modal','Loan Issue')"     class="header-btn btn-dark">Issue Loan</button>
+                <button onclick="openModal('trans-modal','Deposit')" class="header-btn btn-green">+ Deposit</button>
+                <button onclick="openModal('trans-modal','Loan Issue')" class="header-btn btn-dark">Issue Loan</button>
                 <button onclick="openModal('trans-modal','Loan Repayment')" class="header-btn btn-amber">Repayment</button>
             </div>
         </header>
-
-        <!-- Page content -->
         <div class="page-scroll p-6 space-y-6 overflow-y-auto w-full">
-
-            <!-- DASHBOARD -->
             <div id="page-dashboard" class="page-view space-y-6">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="stat-card">
-                        <p class="stat-label">Pool Balance</p>
-                        <h3 id="stat-pool" class="stat-value text-slate-800">RWF 0</h3>
-                    </div>
-                    <div class="stat-card">
-                        <p class="stat-label">On Loan</p>
-                        <h3 id="stat-loan" class="stat-value text-blue-600">RWF 0</h3>
-                    </div>
-                    <div class="stat-card accent-card">
-                        <p class="stat-label text-emerald-600">Est. Interest (10%)</p>
-                        <h3 id="stat-interest" class="stat-value text-emerald-600">RWF 0</h3>
-                    </div>
-                    <div class="stat-card">
-                        <p class="stat-label">Total Members</p>
-                        <h3 id="stat-count" class="stat-value text-slate-800">0</h3>
-                    </div>
+                    <div class="stat-card"><p class="stat-label">Pool Balance</p><h3 id="stat-pool" class="stat-value text-slate-800">RWF 0</h3></div>
+                    <div class="stat-card"><p class="stat-label">On Loan</p><h3 id="stat-loan" class="stat-value text-blue-600">RWF 0</h3></div>
+                    <div class="stat-card accent-card"><p class="stat-label text-emerald-600">Est. Interest (10%)</p><h3 id="stat-interest" class="stat-value text-emerald-600">RWF 0</h3></div>
+                    <div class="stat-card"><p class="stat-label">Total Members</p><h3 id="stat-count" class="stat-value text-slate-800">0</h3></div>
                 </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title">Recent Activity</span>
-                    </div>
-                    <div class="table-wrap">
-                        <table class="data-table">
-                            <thead><tr><th>Member</th><th>Type</th><th class="text-right">Amount</th><th class="text-right">Date</th></tr></thead>
-                            <tbody id="ledger-rows"></tbody>
-                        </table>
-                    </div>
-                </div>
+                <div class="card"><div class="card-header"><span class="card-title">Recent Activity</span></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Member</th><th>Type</th><th class="text-right">Amount</th><th class="text-right">Date</th><th class="text-right">Actions</th></tr></thead><tbody id="ledger-rows"></tbody></table></div></div>
             </div>
-
-            <!-- MEMBERS -->
             <div id="page-members" class="page-view hidden space-y-5">
-                <div class="flex justify-between items-center">
-                    <h2 class="page-title">Member Directory</h2>
-                    <button onclick="openModal('member-modal')" class="header-btn btn-dark">+ New Member</button>
-                </div>
-                <div class="card">
-                    <div class="table-wrap">
-                        <table class="data-table">
-                            <thead><tr><th>Full Name</th><th class="text-right">Balance</th><th class="text-right">Actions</th></tr></thead>
-                            <tbody id="member-directory-rows"></tbody>
-                        </table>
-                    </div>
-                </div>
+                <div class="flex justify-between items-center"><h2 class="page-title">Member Directory</h2><button onclick="openModal('member-modal')" class="header-btn btn-dark">+ New Member</button></div>
+                <div class="card"><div class="table-wrap"><table class="data-table"><thead><tr><th>Full Name</th><th class="text-right">Balance</th><th class="text-right">Actions</th></tr></thead><tbody id="member-directory-rows"></tbody></table></div></div>
             </div>
-
-            <!-- LOANS -->
+            <div id="page-shares" class="page-view hidden space-y-5">
+                <div class="flex justify-between items-center"><h2 class="page-title">Group Shares</h2><button onclick="openModal('share-modal')" class="header-btn btn-dark">+ Add Share</button></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="stat-card accent-card"><p class="stat-label text-emerald-600">Total Per Member</p><h3 id="stat-per-member" class="stat-value text-emerald-600">RWF 0</h3><p class="text-xs text-slate-400 mt-1">Sum of all shares</p></div>
+                    <div class="stat-card"><p class="stat-label">Total Shares Capital</p><h3 id="stat-total-shares" class="stat-value text-slate-800">RWF 0</h3><p class="text-xs text-slate-400 mt-1">Per Member × Number of Members</p></div>
+                </div>
+                <div class="card"><div class="card-header"><span class="card-title">Share Breakdown</span></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Share Name</th><th class="text-right">Amount per Member</th><th class="text-right">Actions</th></tr></thead><tbody id="shares-rows"></tbody></table></div></div>
+            </div>
             <div id="page-loans" class="page-view hidden space-y-5">
                 <h2 class="page-title">Loan Ledger</h2>
-                <div class="card">
-                    <div class="table-wrap">
-                        <table class="data-table">
-                            <thead><tr><th>Borrower</th><th>Date Issued</th><th class="text-right">Principal</th><th class="text-right">Status</th></tr></thead>
-                            <tbody id="loan-ledger-rows"></tbody>
-                        </table>
-                    </div>
-                </div>
+                <div class="card"><div class="table-wrap"><table class="data-table"><thead><tr><th>Borrower</th><th>Date Issued</th><th class="text-right">Principal</th><th class="text-right">Status</th></tr></thead><tbody id="loan-ledger-rows"></tbody></table></div></div>
             </div>
-
-            <!-- REPORTS -->
             <div id="page-reports" class="page-view hidden space-y-5">
                 <h2 class="page-title">Financial Reports</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="report-card">
-                        <div class="report-icon bg-emerald-100">
-                            <svg class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </div>
-                        <p class="report-label">Gross Contributions</p>
-                        <h4 id="report-savings" class="report-value text-emerald-600">RWF 0</h4>
-                    </div>
-                    <div class="report-card">
-                        <div class="report-icon bg-blue-100">
-                            <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                        </div>
-                        <p class="report-label">Outstanding Debt</p>
-                        <h4 id="report-loans" class="report-value text-blue-600">RWF 0</h4>
-                    </div>
+                    <div class="report-card"><div class="report-icon bg-emerald-100"><svg class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><p class="report-label">Gross Contributions</p><h4 id="report-savings" class="report-value text-emerald-600">RWF 0</h4></div>
+                    <div class="report-card"><div class="report-icon bg-blue-100"><svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg></div><p class="report-label">Outstanding Debt</p><h4 id="report-loans" class="report-value text-blue-600">RWF 0</h4></div>
                 </div>
             </div>
-
         </div>
     </main>
 
-    <!-- ── BOTTOM NAV (mobile) ── -->
     <nav id="bottom-nav">
-        <button data-page="dashboard" class="bottom-nav-btn active">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-            Home
-        </button>
-        <button data-page="members" class="bottom-nav-btn">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-            Members
-        </button>
-        <button data-page="loans" class="bottom-nav-btn">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            Loans
-        </button>
-        <button data-page="reports" class="bottom-nav-btn">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
-            Reports
-        </button>
+        <button data-page="dashboard" class="bottom-nav-btn active"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>Home</button>
+        <button data-page="members" class="bottom-nav-btn"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4a4 4 0 11-8 0 4 4 0 018 0z"/></svg>Members</button>
+        <button data-page="shares" class="bottom-nav-btn"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/></svg>Shares</button>
+        <button data-page="loans" class="bottom-nav-btn"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>Loans</button>
+        <button data-page="reports" class="bottom-nav-btn"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>Reports</button>
     </nav>
 
     <!-- ── MEMBER MODAL ── -->
     <div id="member-modal" class="modal-wrap hidden">
         <div class="modal-card">
-            <div class="modal-header">
-                <h3 class="modal-title">Register Member</h3>
-                <button onclick="closeModal('member-modal')" class="modal-close">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
-            <input id="m-name" type="text" placeholder="Full Name" class="modal-input">
-            <div class="modal-actions">
-                <button onclick="closeModal('member-modal')" class="btn-cancel">Cancel</button>
-                <button onclick="saveMember()" class="btn-confirm btn-dark-solid">Save Member</button>
-            </div>
+            <div class="modal-header"><h3 id="member-modal-title" class="modal-title">Register Member</h3><button onclick="closeModal('member-modal')" class="modal-close"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div>
+            <input id="m-name" type="text" placeholder="Full Name" class="modal-input"><input type="hidden" id="m-edit-id">
+            <div class="modal-actions"><button onclick="closeModal('member-modal')" class="btn-cancel">Cancel</button><button onclick="saveMember()" class="btn-confirm btn-dark-solid">Save Member</button></div>
+        </div>
+    </div>
+
+    <!-- ── SHARE MODAL ── -->
+    <div id="share-modal" class="modal-wrap hidden">
+        <div class="modal-card">
+            <div class="modal-header"><h3 id="share-modal-title" class="modal-title">Add Share</h3><button onclick="closeModal('share-modal')" class="modal-close"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div>
+            <label class="modal-label">Share Name</label><input id="s-name" type="text" placeholder="e.g. Social Fund" class="modal-input">
+            <label class="modal-label">Amount Per Member (RWF)</label><input id="s-amount" type="number" inputmode="decimal" placeholder="0" class="modal-input">
+            <input type="hidden" id="s-edit-id">
+            <div class="modal-actions"><button onclick="closeModal('share-modal')" class="btn-cancel">Cancel</button><button onclick="saveShare()" class="btn-confirm btn-dark-solid">Save Share</button></div>
         </div>
     </div>
 
     <!-- ── TRANSACTION MODAL ── -->
     <div id="trans-modal" class="modal-wrap hidden">
         <div class="modal-card">
-            <div class="modal-header">
-                <h3 id="t-modal-title" class="modal-title">Transaction</h3>
-                <button onclick="closeModal('trans-modal')" class="modal-close">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
-            <label class="modal-label">Member</label>
-            <select id="t-member-select" class="modal-input mb-4"></select>
-            <label class="modal-label">Amount (RWF)</label>
-            <input id="t-amount" type="number" inputmode="decimal" placeholder="e.g. 50,000" class="modal-input">
-            <div class="modal-actions">
-                <button onclick="closeModal('trans-modal')" class="btn-cancel">Cancel</button>
-                <button id="t-save-btn" class="btn-confirm">Confirm</button>
-            </div>
+            <div class="modal-header"><h3 id="t-modal-title" class="modal-title">Transaction</h3><button onclick="closeModal('trans-modal')" class="modal-close"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div>
+            <label class="modal-label">Member</label><select id="t-member-select" class="modal-input mb-4"></select>
+            <label class="modal-label">Amount (RWF)</label><input id="t-amount" type="number" inputmode="decimal" placeholder="e.g. 50,000" class="modal-input"><input type="hidden" id="t-edit-id">
+            <div class="modal-actions"><button onclick="closeModal('trans-modal')" class="btn-cancel">Cancel</button><button id="t-save-btn" class="btn-confirm">Confirm</button></div>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+    const SUPABASE_URL      = 'https://kgiuawtfylvxxozscddw.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_ZIr0GzpK6O5R2ow4Y_evUg__8BrJxdI';
+    const { createClient } = supabase;
+    const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let currentUser  = null;
+    let members      = [];
+    let transactions = [];
+    let shares       = []; // Now an array of share items
+
+    let isLogin = true;
+    document.getElementById('toggle-btn').addEventListener('click', () => {
+        isLogin = !isLogin;
+        document.getElementById('auth-btn').textContent   = isLogin ? 'Login'   : 'Sign Up';
+        document.getElementById('toggle-btn').textContent = isLogin ? 'New here? Sign Up' : 'Already have account? Login';
+    });
+
+    document.getElementById('auth-btn').addEventListener('click', async () => {
+        const email    = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value.trim();
+        if (!email || !password) return alert('Please enter email and password.');
+        const btn = document.getElementById('auth-btn');
+        btn.textContent = 'Please wait…'; btn.disabled = true;
+        try {
+            const result = isLogin ? await db.auth.signInWithPassword({ email, password }) : await db.auth.signUp({ email, password });
+            if (result.error) throw result.error;
+            if (!isLogin && result.data?.user && !result.data.session) {
+                alert('Account created! Check your email to confirm, then log in.');
+                isLogin = true; document.getElementById('auth-btn').textContent = 'Login'; document.getElementById('toggle-btn').textContent = 'New here? Sign Up';
+            }
+        } catch (err) { alert('Auth error: ' + err.message); } 
+        finally { btn.textContent = isLogin ? 'Login' : 'Sign Up'; btn.disabled = false; }
+    });
+
+    db.auth.onAuthStateChange((_event, session) => {
+        if (session?.user) { currentUser = session.user; onLogin(); } else { currentUser = null; onLogout(); }
+    });
+    document.getElementById('logout-btn').addEventListener('click', () => db.auth.signOut());
+
+    function onLogin() {
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('sidebar').classList.remove('hidden');
+        document.getElementById('main-app').classList.remove('hidden');
+        const email = currentUser.email;
+        document.getElementById('user-name').textContent = email;
+        const avatar = document.querySelector('.w-8.h-8.rounded-full');
+        if (avatar) avatar.textContent = email[0].toUpperCase();
+        loadAll();
+    }
+
+    function onLogout() {
+        document.getElementById('auth-screen').classList.remove('hidden');
+        document.getElementById('sidebar').classList.add('hidden');
+        document.getElementById('main-app').classList.add('hidden');
+    }
+
+    async function loadAll() {
+        const { data: mData, error: mErr } = await db.from('members').select('*').eq('owner_id', currentUser.id).order('name');
+        if (mErr) { console.error(mErr); return; } members = mData || [];
+
+        const { data: tData, error: tErr } = await db.from('transactions').select('*').eq('owner_id', currentUser.id).order('created_at', { ascending: false });
+        if (tErr) { console.error(tErr); return; } transactions = tData || [];
+
+        const { data: sData } = await db.from('shares').select('*').eq('owner_id', currentUser.id).order('created_at');
+        shares = sData || [];
+
+        renderAll();
+    }
+
+    async function saveMember() {
+        const name = document.getElementById('m-name').value.trim();
+        const editId = document.getElementById('m-edit-id').value;
+        if (!name) return alert('Please enter a name.');
+        if (editId) {
+            const { data, error } = await db.from('members').update({ name }).eq('id', editId).eq('owner_id', currentUser.id).select().single();
+            if (error) { alert('Error: ' + error.message); return; }
+            members = members.map(m => m.id === editId ? data : m);
+        } else {
+            const { data, error } = await db.from('members').insert([{ name, owner_id: currentUser.id }]).select().single();
+            if (error) { alert('Error: ' + error.message); return; }
+            members.push(data);
+        }
+        members.sort((a, b) => a.name.localeCompare(b.name));
+        document.getElementById('m-name').value = ''; document.getElementById('m-edit-id').value = '';
+        document.getElementById('member-modal-title').textContent = 'Register Member';
+        closeModal('member-modal'); renderAll();
+    }
+
+    function editMember(id, name) {
+        document.getElementById('m-name').value = name; document.getElementById('m-edit-id').value = id;
+        document.getElementById('member-modal-title').textContent = 'Edit Member'; openModal('member-modal');
+    }
+
+    async function deleteMember(id, name) {
+        if (!confirm(`Remove "${name}" from the group? This also deletes all their transactions.`)) return;
+        const { error } = await db.from('members').delete().eq('id', id).eq('owner_id', currentUser.id);
+        if (error) { alert('Error: ' + error.message); return; }
+        members = members.filter(m => m.id !== id); transactions = transactions.filter(t => t.member_id !== id); renderAll();
+    }
+
+    // ── SHARES (DYNAMIC) ────────────────────────────────────────
+    function openEditShareModal(id, name, amount) {
+        document.getElementById('s-name').value = name;
+        document.getElementById('s-amount').value = amount;
+        document.getElementById('s-edit-id').value = id;
+        document.getElementById('share-modal-title').textContent = 'Edit Share';
+        openModal('share-modal');
+    }
+
+    async function saveShare() {
+        const name = document.getElementById('s-name').value.trim();
+        const amount = parseFloat(document.getElementById('s-amount').value) || 0;
+        const editId = document.getElementById('s-edit-id').value;
+        
+        if (!name) return alert('Please enter a share name.');
+
+        if (editId) {
+            const { data, error } = await db.from('shares').update({ name, amount }).eq('id', editId).eq('owner_id', currentUser.id).select().single();
+            if (error) { alert('Error: ' + error.message); return; }
+            shares = shares.map(s => s.id === editId ? data : s);
+        } else {
+            const { data, error } = await db.from('shares').insert([{ name, amount, owner_id: currentUser.id }]).select().single();
+            if (error) { alert('Error: ' + error.message); return; }
+            shares.push(data);
+        }
+
+        document.getElementById('s-name').value = ''; document.getElementById('s-amount').value = ''; 
+        document.getElementById('s-edit-id').value = '';
+        document.getElementById('share-modal-title').textContent = 'Add Share';
+        closeModal('share-modal'); renderAll();
+    }
+
+    async function deleteShare(id, name) {
+        if (!confirm(`Delete the "${name}" share?`)) return;
+        const { error } = await db.from('shares').delete().eq('id', id).eq('owner_id', currentUser.id);
+        if (error) { alert('Error: ' + error.message); return; }
+        shares = shares.filter(s => s.id !== id); renderAll();
+    }
+
+    // ── TRANSACTIONS ────────────────────────────────────────────
+    let currentTransType = 'Deposit';
+    function openModal(modalId, type = null, preselectedMemberId = null) {
+        document.getElementById(modalId).classList.remove('hidden');
+        if (modalId === 'trans-modal' && type) {
+            currentTransType = type; document.getElementById('t-modal-title').textContent = type; document.getElementById('t-edit-id').value = '';
+            const btn = document.getElementById('t-save-btn'); btn.textContent = 'Confirm ' + type;
+            btn.style.background = type === 'Deposit' ? '#10b981' : type === 'Loan Issue' ? '#0f172a' : '#f59e0b';
+            const sel = document.getElementById('t-member-select'); sel.disabled = false;
+            sel.innerHTML = members.length ? members.map(m => `<option value="${m.id}">${m.name}</option>`).join('') : '<option disabled>No members yet</option>';
+            if (preselectedMemberId) sel.value = preselectedMemberId;
+        }
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+        if (modalId === 'trans-modal') { document.getElementById('t-amount').value = ''; document.getElementById('t-member-select').disabled = false; }
+        if (modalId === 'member-modal') { document.getElementById('m-name').value = ''; document.getElementById('m-edit-id').value = ''; document.getElementById('member-modal-title').textContent = 'Register Member'; }
+        if (modalId === 'share-modal') { document.getElementById('s-name').value = ''; document.getElementById('s-amount').value = ''; document.getElementById('s-edit-id').value = ''; document.getElementById('share-modal-title').textContent = 'Add Share'; }
+    }
+
+    function editTransaction(id, currentAmount, currentType, memberId) {
+        document.getElementById('t-amount').value = currentAmount; document.getElementById('t-edit-id').value = id;
+        document.getElementById('t-modal-title').textContent = 'Edit ' + currentType;
+        const btn = document.getElementById('t-save-btn'); btn.textContent = 'Update ' + currentType;
+        btn.style.background = currentType === 'Deposit' ? '#10b981' : currentType === 'Loan Issue' ? '#0f172a' : '#f59e0b';
+        const sel = document.getElementById('t-member-select');
+        sel.innerHTML = `<option value="${memberId}" selected>${members.find(m=>m.id===memberId)?.name || 'Unknown'}</option>`;
+        sel.disabled = true; currentTransType = currentType; document.getElementById('trans-modal').classList.remove('hidden');
+    }
+
+    document.getElementById('t-save-btn').addEventListener('click', async () => {
+        const memberId = document.getElementById('t-member-select').value;
+        const amount   = parseFloat(document.getElementById('t-amount').value);
+        const editId   = document.getElementById('t-edit-id').value;
+        if (!memberId) { alert('Please select a member.'); return; }
+        if (!amount || amount <= 0) { alert('Please enter a valid amount.'); return; }
+        if (!editId && currentTransType === 'Loan Issue') { const pool = calcPoolBalance(); if (amount > pool) { alert(`Insufficient pool. Available: ${fmt(pool)}`); return; } }
+        if (!editId && currentTransType === 'Loan Repayment') { const owed = memberOutstandingLoan(memberId); if (owed === 0) { alert('This member has no outstanding loan.'); return; } if (amount > owed) { alert(`Exceeds outstanding balance: ${fmt(owed)}`); return; } }
+        let error;
+        if (editId) {
+            const result = await db.from('transactions').update({ amount }).eq('id', editId).eq('owner_id', currentUser.id).select().single();
+            error = result.error; if (!error) transactions = transactions.map(t => t.id === editId ? result.data : t);
+        } else {
+            const result = await db.from('transactions').insert([{ member_id: memberId, type: currentTransType, amount, owner_id: currentUser.id }]).select().single();
+            error = result.error; if (!error) transactions.unshift(result.data);
+        }
+        if (error) { alert('Error: ' + error.message); return; }
+        closeModal('trans-modal'); renderAll();
+    });
+
+    ['member-modal', 'trans-modal', 'share-modal'].forEach(id => { document.getElementById(id).addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(id); }); });
+
+    // ── CALCULATIONS ────────────────────────────────────────────
+    function calcTotalSharePerMember() { return shares.reduce((sum, s) => sum + (s.amount || 0), 0); }
+    function memberBalance(memberId) {
+        const sharesBalance = calcTotalSharePerMember(); 
+        const transBalance = transactions.filter(t => t.member_id === memberId).reduce((sum, t) => { if (t.type === 'Deposit') return sum + t.amount; if (t.type === 'Loan Issue') return sum - t.amount; if (t.type === 'Loan Repayment') return sum + t.amount; return sum; }, 0);
+        return sharesBalance + transBalance;
+    }
+    function memberOutstandingLoan(memberId) { const issued = transactions.filter(t => t.member_id === memberId && t.type === 'Loan Issue').reduce((s,t) => s + t.amount, 0); const repaid = transactions.filter(t => t.member_id === memberId && t.type === 'Loan Repayment').reduce((s,t) => s + t.amount, 0); return Math.max(0, issued - repaid); }
+    function calcPoolBalance() { const sharesCapital = calcTotalSharePerMember() * members.length; const transBalance = transactions.reduce((sum, t) => { if (t.type === 'Deposit') return sum + t.amount; if (t.type === 'Loan Issue') return sum - t.amount; if (t.type === 'Loan Repayment') return sum + t.amount; return sum; }, 0); return sharesCapital + transBalance; }
+    function calcTotalOnLoan() { const issued = transactions.filter(t => t.type === 'Loan Issue').reduce((s,t) => s + t.amount, 0); const repaid = transactions.filter(t => t.type === 'Loan Repayment').reduce((s,t) => s + t.amount, 0); return Math.max(0, issued - repaid); }
+    function calcGrossDeposits() { return transactions.filter(t => t.type === 'Deposit').reduce((s,t) => s + t.amount, 0); }
+    function calcEstimatedInterest() { return calcTotalOnLoan() * 0.10; }
+    function fmt(n) { return 'RWF ' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
+    function fmtDate(iso) { return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+
+    // ── RENDER ──────────────────────────────────────────────────
+    function renderAll() { renderDashboard(); renderMemberDirectory(); renderShares(); renderLoanLedger(); renderReports(); }
+    function renderDashboard() {
+        document.getElementById('stat-pool').textContent     = fmt(calcPoolBalance());
+        document.getElementById('stat-loan').textContent     = fmt(calcTotalOnLoan());
+        document.getElementById('stat-interest').textContent = fmt(calcEstimatedInterest());
+        document.getElementById('stat-count').textContent    = members.length;
+        const memberMap = Object.fromEntries(members.map(m => [m.id, m.name]));
+        document.getElementById('ledger-rows').innerHTML = transactions.slice(0, 20).map(t => `
+            <tr>
+                <td class="font-semibold text-slate-800">${memberMap[t.member_id] || '—'}</td>
+                <td><span class="badge ${t.type === 'Deposit' ? 'badge-green' : t.type === 'Loan Issue' ? 'badge-blue' : 'badge-amber'}">${t.type}</span></td>
+                <td class="text-right font-bold ${t.type === 'Deposit' ? 'text-emerald-600' : t.type === 'Loan Issue' ? 'text-blue-600' : 'text-amber-600'}">${t.type === 'Loan Issue' ? '−' : '+'}${fmt(t.amount)}</td>
+                <td class="text-right text-slate-400 text-xs">${fmtDate(t.created_at)}</td>
+                <td class="text-right"><button onclick="editTransaction('${t.id}', ${t.amount}, '${t.type}', '${t.member_id}')" style="padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700;background:#f1f5f9;color:#475569;border:none;cursor:pointer;">Edit</button></td>
+            </tr>`).join('') || `<tr><td colspan="5" class="text-center text-slate-400 text-xs py-10">No transactions yet.</td></tr>`;
+    }
+
+    function renderMemberDirectory() {
+        document.getElementById('member-directory-rows').innerHTML = members.map(m => {
+            const bal = memberBalance(m.id); const outstanding = memberOutstandingLoan(m.id); const hasLoan = outstanding > 0; const safeName = m.name.replace(/'/g, "\\'");
+            return `<tr>
+                <td><div class="font-semibold text-slate-800">${m.name}</div>${hasLoan ? `<div class="mt-1"><span class="badge badge-blue">Loan: ${fmt(outstanding)}</span></div>` : ''}</td>
+                <td class="text-right font-bold ${bal >= 0 ? 'text-emerald-600' : 'text-red-500'}">${fmt(bal)}</td>
+                <td class="text-right"><div style="display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap;">
+                    <button onclick="editMember('${m.id}','${safeName}')" style="padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;background:#f1f5f9;color:#475569;border:none;cursor:pointer;">Edit</button>
+                    ${hasLoan ? `<button onclick="openModal('trans-modal','Loan Repayment','${m.id}')" style="padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;background:#fffbeb;color:#d97706;border:none;cursor:pointer;">Repayment</button>` : ''}
+                    <button onclick="deleteMember('${m.id}','${safeName}')" style="padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;background:#fef2f2;color:#dc2626;border:none;cursor:pointer;">Remove</button>
+                </div></td></tr>`;
+        }).join('') || `<tr><td colspan="3" class="text-center text-slate-400 text-xs py-10">No members yet.</td></tr>`;
+    }
+
+    function renderShares() {
+        const totalPerMember = calcTotalSharePerMember(); const totalCapital = totalPerMember * members.length;
+        document.getElementById('stat-per-member').textContent = fmt(totalPerMember);
+        document.getElementById('stat-total-shares').textContent = fmt(totalCapital);
+        document.getElementById('shares-rows').innerHTML = shares.map(s => {
+            const safeName = s.name.replace(/'/g, "\\'");
+            return `<tr>
+                <td class="font-semibold text-slate-800">${s.name}</td>
+                <td class="text-right font-bold text-emerald-600">${fmt(s.amount || 0)}</td>
+                <td class="text-right"><div style="display:flex;justify-content:flex-end;gap:6px;">
+                    <button onclick="openEditShareModal('${s.id}','${safeName}', ${s.amount})" style="padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;background:#f1f5f9;color:#475569;border:none;cursor:pointer;">Edit</button>
+                    <button onclick="deleteShare('${s.id}','${safeName}')" style="padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;background:#fef2f2;color:#dc2626;border:none;cursor:pointer;">Delete</button>
+                </div></td>
+            </tr>`;
+        }).join('') || `<tr><td colspan="3" class="text-center text-slate-400 text-xs py-10">No shares added yet. Click "+ Add Share" to start.</td></tr>`;
+    }
+
+    function renderLoanLedger() {
+        const memberMap = Object.fromEntries(members.map(m => [m.id, m.name]));
+        document.getElementById('loan-ledger-rows').innerHTML = transactions.filter(t => t.type === 'Loan Issue').map(t => {
+            const outstanding = memberOutstandingLoan(t.member_id); const cleared = outstanding === 0;
+            return `<tr><td class="font-semibold text-slate-800">${memberMap[t.member_id] || '—'}</td><td class="text-slate-400">${fmtDate(t.created_at)}</td><td class="text-right font-bold text-blue-600">${fmt(t.amount)}</td><td class="text-right">${cleared ? `<span class="badge badge-green">✓ Cleared</span>` : `<span class="badge badge-red">Owing ${fmt(outstanding)}</span>`}</td></tr>`;
+        }).join('') || `<tr><td colspan="4" class="text-center text-slate-400 text-xs py-10">No loans issued yet.</td></tr>`;
+    }
+
+    function renderReports() { document.getElementById('report-savings').textContent = fmt(calcGrossDeposits()); document.getElementById('report-loans').textContent = fmt(calcTotalOnLoan()); }
+
+    // ── NAVIGATION ──────────────────────────────────────────────
+    const pages   = { dashboard: 'page-dashboard', members: 'page-members', shares: 'page-shares', loans: 'page-loans', reports: 'page-reports' };
+    const navBtns = { dashboard: 'nav-dashboard',  members: 'nav-members',  shares: 'nav-shares',  loans: 'nav-loans',  reports: 'nav-reports' };
+    const titles  = { dashboard: 'Dashboard', members: 'Member Directory', shares: 'Group Shares', loans: 'Loan Ledger', reports: 'Reports' };
+    function showPage(name) {
+        Object.values(pages).forEach(id => document.getElementById(id).classList.add('hidden'));
+        Object.values(navBtns).forEach(id => { const el = document.getElementById(id); el.classList.remove('active-nav'); el.classList.add('text-white/50'); });
+        document.getElementById(pages[name]).classList.remove('hidden'); const btn = document.getElementById(navBtns[name]); btn.classList.add('active-nav'); btn.classList.remove('text-white/50');
+        document.getElementById('header-title').textContent = titles[name]; document.querySelectorAll('.bottom-nav-btn').forEach(b => b.classList.toggle('active', b.dataset.page === name));
+    }
+    Object.keys(navBtns).forEach(name => { document.getElementById(navBtns[name]).addEventListener('click', () => { showPage(name); closeSidebar(); }); });
+
+    document.getElementById('hamburger-btn').addEventListener('click', () => { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebar-overlay').classList.add('open'); });
+    function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('open'); }
+    document.getElementById('sidebar-close').addEventListener('click', closeSidebar);
+    document.getElementById('sidebar-overlay').addEventListener('click', closeSidebar);
+    document.querySelectorAll('.bottom-nav-btn').forEach(btn => { btn.addEventListener('click', () => { showPage(btn.dataset.page); closeSidebar(); }); });
+    </script>
 </body>
 </html>
